@@ -1,0 +1,40 @@
+/* Reset */
+* {margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif;}
+body {background: linear-gradient(to bottom, #e9f5e9, #fefefe); color:#333;}
+
+/* Navbar */
+.navbar {display:flex; justify-content:space-between; padding:1rem 2rem; align-items:center; background:#fff8;}
+.logo {font-size:1.5rem; font-weight:600;}
+.nav-links {list-style:none; display:flex; gap:1rem;}
+.nav-links a {text-decoration:none; color:#333; transition:0.3s;}
+.nav-links a:hover {color:#2e8b57; border-bottom:2px solid #2e8b57;}
+
+/* Hero */
+.hero {text-align:center; padding:4rem 2rem; background:url('../assets/bg-farm.jpg') center/cover no-repeat; color:white;}
+.hero h1 {font-size:2.5rem; margin-bottom:1rem; text-shadow:0 2px 5px rgba(0,0,0,0.5);}
+.hero p {font-size:1.2rem; max-width:600px; margin:auto;}
+
+/* Login Card */
+.login-card {
+  width:350px; margin:2rem auto; padding:2rem;
+  border-radius:15px; background:rgba(255,255,255,0.2);
+  backdrop-filter:blur(15px); box-shadow:0 8px 25px rgba(0,0,0,0.2);
+  animation:fadeIn 1s ease;
+}
+.login-card h2 {margin-bottom:1rem; text-align:center;}
+.login-card label {display:block; margin-top:1rem; font-weight:600;}
+.login-card input, select {
+  width:100%; padding:0.8rem; margin-top:0.5rem; border:none; border-radius:10px;
+  background:#fff9; outline:none; font-size:1rem;
+}
+.login-card input:focus {border:2px solid #2e8b57;}
+#loginBtn {
+  width:100%; margin-top:1.5rem; padding:0.8rem; border:none;
+  border-radius:10px; background:#2e8b57; color:white; font-size:1rem; cursor:pointer;
+  transition:all 0.3s;
+}
+#loginBtn:hover {background:#246b45;}
+.register-text {text-align:center; margin-top:1rem;}
+
+/* Animation */
+@keyframes fadeIn {from {opacity:0; transform:translateY(20px);} to {opacity:1; transform:translateY(0);}}

@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgriAi Advisory - Login</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #2e8b57;
+      --primary-dark: #246b45;
+      --primary-light: #e9f5e9;
+      --secondary: #ffa500;
+      --accent: #4682b4;
+      --text: #333;
+      --text-light: #666;
+      --bg: #fefefe;
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+    
+    .dark {
+      --text: #f0f0f0;
+      --text-light: #ccc;
+      --bg: #1a1a1a;
+      --card-bg: rgba(40, 40, 40, 0.95);
+      --primary-light: #1a3020;
+      --shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(to bottom, var(--primary-light), var(--bg));
+      color: var(--text);
+      min-height: 100vh;
+      transition: var(--transition);
+    }
+    
+    /* Navigation */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      transition: var(--transition);
+    }
+    
+    .dark .navbar {
+      background: rgba(30, 30, 30, 0.95);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+    
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .nav-links {
+      list-style: none;
+      display: flex;
+      gap: 1.5rem;
+    }
+    
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 500;
+      padding: 0.5rem 0;
+      position: relative;
+      transition: var(--transition);
+    }
+    
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--primary);
+      transition: var(--transition);
+    }
+    
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+    
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+    
+    .user-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    #darkToggle, #languageToggle {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: var(--transition);
+      padding: 0.5rem;
+      border-radius: 50%;
+      background: var(--primary-light);
+    }
+    
+    #darkToggle:hover, #languageToggle:hover {
+      transform: rotate(15deg);
+    }
+    
+    /* Main Content Container */
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+    
+    /* Tabs for switching between Login and Register */
+    .tabs {
+      display: flex;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid var(--primary-light);
+    }
+    
+    .tab {
+      padding: 1rem 2rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: var(--transition);
+      border-bottom: 3px solid transparent;
+    }
+    
+    .tab.active {
+      color: var(--primary);
+      border-bottom: 3px solid var(--primary);
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+    
+    /* Form Styles */
+    .form-container {
+      display: flex;
+      justify-content: center;
+    }
+    
+    .form-card {
+      width: 100%;
+      max-width: 450px;
+      padding: 2.5rem;
+      border-radius: 20px;
+      background: var(--card-bg);
+      backdrop-filter: blur(15px);
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+    }
+    
+    .form-card h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: var(--primary);
+      font-size: 1.8rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 0.9rem 1.2rem;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.8);
+      font-size: 1rem;
+      transition: var(--transition);
+      color: var(--text);
+    }
+    
+    .dark .form-control {
+      background: rgba(50, 50, 50, 0.8);
+      border-color: #444;
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.2);
+    }
+    
+    .form-select {
+      width: 100%;
+      padding: 0.9rem 1.2rem;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.8);
+      font-size: 1rem;
+      transition: var(--transition);
+      color: var(--text);
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      background-size: 1em;
+    }
+    
+    .dark .form-select {
+      background: rgba(50, 50, 50, 0.8);
+      border-color: #444;
+    }
+    
+    .btn-primary {
+      width: 100%;
+      padding: 1rem;
+      border: none;
+      border-radius: 10px;
+      background: var(--primary);
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      margin-top: 1rem;
+    }
+    
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(46, 139, 87, 0.3);
+    }
+    
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+    
+    .form-footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      color: var(--text-light);
+    }
+    
+    .form-footer a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+    
+    .form-footer a:hover {
+      text-decoration: underline;
+    }
+    
+    /* Notification */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      border-radius: 10px;
+      background: var(--card-bg);
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 1000;
+      transform: translateX(150%);
+      transition: transform 0.3s ease;
+    }
+    
+    .notification.show {
+      transform: translateX(0);
+    }
+    
+    .notification.success {
+      border-left: 4px solid var(--primary);
+    }
+    
+    .notification.error {
+      border-left: 4px solid #f44336;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .navbar {
+        padding: 1rem;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      .nav-links {
+        gap: 1rem;
+      }
+      
+      .container {
+        padding: 0 1rem;
+      }
+      
+      .form-card {
+        padding: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="logo">
+      <i class="fas fa-leaf"></i> AgriAi
+    </div>
+    <ul class="nav-links">
+      <li><a href="#" class="active">Home</a></li>
+      <li><a href="#">About</a></li>
+      <li><a href="#">Services</a></li>
+      <li><a href="#">Contact</a></li>
+    </ul>
+    <div class="user-actions">
+      <button id="languageToggle" title="Change language">
+        <i class="fas fa-language"></i>
+      </button>
+      <button id="darkToggle" title="Toggle dark mode">
+        <i class="fas fa-moon"></i>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container">
+    <!-- Tabs for Login/Register -->
+    <div class="tabs">
+      <div class="tab active" data-tab="login">Login</div>
+      <div class="tab" data-tab="register">Register</div>
+    </div>
+
+    <!-- Login Form -->
+    <div class="tab-content active" id="login-tab">
+      <div class="form-container">
+        <div class="form-card">
+          <h2><i class="fas fa-sign-in-alt"></i> Login to AgriAi</h2>
+          
+          <div class="form-group">
+            <label for="login-role">I am a</label>
+            <select id="login-role" class="form-select">
+              <option value="farmer">👨‍🌾 Farmer</option>
+              <option value="expert">👨‍🏫 Expert</option>
+              <option value="policy">🏛️ Policymaker</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="login-username">Username or Phone</label>
+            <input type="text" id="login-username" class="form-control" placeholder="Enter your username or phone">
+          </div>
+
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" class="form-control" placeholder="Enter your password">
+          </div>
+
+          <button id="loginBtn" class="btn-primary">
+            <i class="fas fa-paper-plane"></i> Login
+          </button>
+          
+          <div class="form-footer">
+            Don't have an account? <a href="#" id="switch-to-register">Register here</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Registration Form -->
+    <div class="tab-content" id="register-tab">
+      <div class="form-container">
+        <div class="form-card">
+          <h2><i class="fas fa-user-plus"></i> Create an Account</h2>
+          
+          <div class="form-group">
+            <label for="register-role">I am a</label>
+            <select id="register-role" class="form-select">
+              <option value="farmer">👨‍🌾 Farmer</option>
+              <option value="expert">👨‍🏫 Expert</option>
+              <option value="policy">🏛️ Policymaker</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="register-name">Full Name</label>
+            <input type="text" id="register-name" class="form-control" placeholder="Enter your full name">
+          </div>
+
+          <div class="form-group">
+            <label for="register-phone">Phone Number</label>
+            <input type="tel" id="register-phone" class="form-control" placeholder="Enter your phone number">
+          </div>
+
+          <div class="form-group">
+            <label for="register-username">Username</label>
+            <input type="text" id="register-username" class="form-control" placeholder="Choose a username">
+          </div>
+
+          <div class="form-group">
+            <label for="register-password">Password</label>
+            <input type="password" id="register-password" class="form-control" placeholder="Create a password">
+          </div>
+
+          <div class="form-group">
+            <label for="register-confirm">Confirm Password</label>
+            <input type="password" id="register-confirm" class="form-control" placeholder="Confirm your password">
+          </div>
+
+          <button id="registerBtn" class="btn-primary">
+            <i class="fas fa-user-plus"></i> Register
+          </button>
+          
+          <div class="form-footer">
+            Already have an account? <a href="#" id="switch-to-login">Login here</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification -->
+  <div class="notification">
+    <i class="fas fa-check-circle"></i>
+    <div class="notification-content">Your message here</div>
+  </div>
+
+  <script>
+    // DOM Elements
+    const darkToggle = document.getElementById('darkToggle');
+    const tabs = document.querySelectorAll('.tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+    const switchToRegister = document.getElementById('switch-to-register');
+    const switchToLogin = document.getElementById('switch-to-login');
+    const loginBtn = document.getElementById('loginBtn');
+    const registerBtn = document.getElementById('registerBtn');
+    const notification = document.querySelector('.notification');
+    
+    // Dark Mode Toggle
+    darkToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      if (document.body.classList.contains('dark')) {
+        darkToggle.innerHTML = '<i class="fas fa-sun"></i>';
+      } else {
+        darkToggle.innerHTML = '<i class="fas fa-moon"></i>';
+      }
+    });
+    
+    // Tab Switching
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const target = tab.dataset.tab;
+        
+        // Update active tab
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        // Show corresponding content
+        tabContents.forEach(content => {
+          if (content.id === `${target}-tab`) {
+            content.classList.add('active');
+          } else {
+            content.classList.remove('active');
+          }
+        });
+      });
+    });
+    
+    // Switch to Register tab
+    switchToRegister.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.querySelector('[data-tab="register"]').click();
+    });
+    
+    // Switch to Login tab
+    switchToLogin.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.querySelector('[data-tab="login"]').click();
+    });
+    
+    // Login Functionality
+    loginBtn.addEventListener('click', () => {
+      const role = document.getElementById('login-role').value;
+      const username = document.getElementById('login-username').value.trim();
+      const password = document.getElementById('login-password').value;
+      
+      // Basic validation
+      if (!username) {
+        showNotification('Please enter your username', 'error');
+        return;
+      }
+      
+      if (!password) {
+        showNotification('Please enter your password', 'error');
+        return;
+      }
+      
+      // Simulate login process
+      showNotification('Logging in...', 'success');
+      
+      // Redirect after a short delay to simulate processing
+      setTimeout(() => {
+        if (role === 'farmer') {
+          window.location.href = 'farmer-dashboard.html';
+        } else if (role === 'expert') {
+          window.location.href = 'expert-dashboard.html';
+        } else if (role === 'policy') {
+          window.location.href = 'policy-dashboard.html';
+        }
+      }, 1500);
+    });
+    
+    // Registration Functionality
+    registerBtn.addEventListener('click', () => {
+      const role = document.getElementById('register-role').value;
+      const name = document.getElementById('register-name').value.trim();
+      const phone = document.getElementById('register-phone').value.trim();
+      const username = document.getElementById('register-username').value.trim();
+      const password = document.getElementById('register-password').value;
+      const confirm = document.getElementById('register-confirm').value;
+      
+      // Basic validation
+      if (!name) {
+        showNotification('Please enter your full name', 'error');
+        return;
+      }
+      
+      if (!phone) {
+        showNotification('Please enter your phone number', 'error');
+        return;
+      }
+      
+      if (!username) {
+        showNotification('Please choose a username', 'error');
+        return;
+      }
+      
+      if (!password) {
+        showNotification('Please create a password', 'error');
+        return;
+      }
+      
+      if (password !== confirm) {
+        showNotification('Passwords do not match', 'error');
+        return;
+      }
+      
+      // Simulate registration process
+      showNotification('Creating your account...', 'success');
+      
+      // Redirect after a short delay to simulate processing
+      setTimeout(() => {
+        if (role === 'farmer') {
+          window.location.href = 'farmer-dashboard.html';
+        } else if (role === 'expert') {
+          window.location.href = 'expert-dashboard.html';
+        } else if (role === 'policy') {
+          window.location.href = 'policy-dashboard.html';
+        }
+      }, 1500);
+    });
+    
+    // Show notification function
+    function showNotification(message, type) {
+      const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+      notification.innerHTML = `<i class="fas ${icon}"></i><div class="notification-content">${message}</div>`;
+      notification.className = `notification ${type}`;
+      notification.classList.add('show');
+      
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 3000);
+    }
+    
+    // Add Enter key support for forms
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        if (document.getElementById('login-tab').classList.contains('active')) {
+          loginBtn.click();
+        } else {
+          registerBtn.click();
+        }
+      }
+    });
+  </script>
+</body>
+</html>
