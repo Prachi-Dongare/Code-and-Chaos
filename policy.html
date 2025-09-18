@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Farmer Policies</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2e7d32;
+      --primary-light: #4caf50;
+      --primary-dark: #1b5e20;
+      --accent: #ff9800;
+      --text-dark: #1e3a1e;
+      --text-light: #5a735a;
+      --bg-light: #f8fbf8;
+      --card-shadow: 0 8px 20px rgba(46, 125, 50, 0.1);
+      --card-shadow-hover: 0 12px 30px rgba(46, 125, 50, 0.2);
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e9 100%);
+      color: var(--text-dark);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(90deg, var(--primary-dark) 0%, var(--primary) 100%);
+      color: #fff;
+      padding: 15px 30px;
+      border-bottom-left-radius: 20px;
+      border-bottom-right-radius: 20px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.15);
+      animation: slideDown 0.7s ease;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    @keyframes slideDown {
+      from { transform: translateY(-100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .navbar h1 {
+      font-weight: 600;
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .navbar a {
+      color: #fff;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.15);
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+    
+    .navbar a:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateY(-2px);
+    }
+    
+    .container {
+      padding: 30px;
+      max-width: 1300px;
+      margin: auto;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .header h2 {
+      font-size: 2.2rem;
+      color: var(--primary-dark);
+      margin-bottom: 10px;
+      position: relative;
+      display: inline-block;
+    }
+    
+    .header h2:after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+    
+    .header p {
+      color: var(--text-light);
+      max-width: 700px;
+      margin: 15px auto 0;
+    }
+    
+    .search-container {
+      background: white;
+      border-radius: 50px;
+      padding: 5px 20px;
+      margin: 0 auto 30px;
+      max-width: 600px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+      display: flex;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+    
+    .search-container:focus-within {
+      box-shadow: 0 5px 20px rgba(46, 125, 50, 0.25);
+      transform: translateY(-2px);
+    }
+    
+    .search-container i {
+      color: var(--primary-light);
+      font-size: 1.2rem;
+    }
+    
+    .search-bar {
+      flex: 1;
+      border: none;
+      padding: 15px;
+      font-size: 1rem;
+      outline: none;
+      background: transparent;
+      color: var(--text-dark);
+    }
+    
+    .search-bar::placeholder {
+      color: #aaa;
+    }
+    
+    .filter-options {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+    
+    .filter-btn {
+      padding: 8px 18px;
+      background: white;
+      border: none;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+      color: var(--text-light);
+    }
+    
+    .filter-btn.active, .filter-btn:hover {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+    }
+    
+    .policies {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 25px;
+    }
+    
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 25px;
+      box-shadow: var(--card-shadow);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      overflow: hidden;
+      position: relative;
+      border-top: 5px solid var(--primary-light);
+    }
+    
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--card-shadow-hover);
+    }
+    
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 15px;
+    }
+    
+    .icon-container {
+      background: rgba(76, 175, 80, 0.1);
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 15px;
+      flex-shrink: 0;
+    }
+    
+    .icon-container i {
+      color: var(--primary);
+      font-size: 1.4rem;
+    }
+    
+    .card h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      color: var(--primary-dark);
+      line-height: 1.3;
+    }
+    
+    .card p {
+      color: var(--text-light);
+      font-size: 0.95rem;
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+    
+    .details {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease;
+      font-size: 0.9rem;
+      color: #555;
+      line-height: 1.6;
+      padding-top: 0;
+    }
+    
+    .card.open .details {
+      max-height: 500px;
+      padding-top: 15px;
+      border-top: 1px solid #eee;
+    }
+    
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      margin-top: 15px;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      border-radius: 20px;
+      color: #fff;
+      background: var(--primary-light);
+      animation: pulse 2s infinite;
+      gap: 5px;
+    }
+    
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4); }
+      70% { box-shadow: 0 0 0 8px rgba(76, 175, 80, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+    }
+    
+    .read-more {
+      position: absolute;
+      bottom: 20px;
+      right: 25px;
+      color: var(--primary);
+      font-size: 0.85rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .card:hover .read-more {
+      opacity: 1;
+    }
+    
+    .no-results {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 40px;
+      color: var(--text-light);
+    }
+    
+    .no-results i {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      color: #ccc;
+    }
+    
+    @media (max-width: 768px) {
+      .navbar {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px;
+      }
+      
+      .container {
+        padding: 20px;
+      }
+      
+      .policies {
+        grid-template-columns: 1fr;
+      }
+      
+      .header h2 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <h1><i class="fa-solid fa-scroll"></i> Farmer Policies Portal</h1>
+    <div>
+      <a href="dashboard.html"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="header">
+      <h2>Government Farmer Support Schemes</h2>
+      <p>Explore various government policies and schemes designed to support farmers across India</p>
+    </div>
+    
+    <div class="search-container">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" class="search-bar" id="search" placeholder="Search policies by name, benefits, or eligibility...">
+    </div>
+    
+    <div class="filter-options">
+      <button class="filter-btn active">All Policies</button>
+      <button class="filter-btn">Financial Support</button>
+      <button class="filter-btn">Insurance</button>
+      <button class="filter-btn">Irrigation</button>
+      <button class="filter-btn">Special Groups</button>
+    </div>
+    
+    <div class="policies" id="policyList">
+      <!-- Example Policy Card with More Details -->
+      <div class="card">
+        <div class="card-header">
+          <div class="icon-container">
+            <i class="fa-solid fa-coins"></i>
+          </div>
+          <h3>PM-Kisan Samman Nidhi</h3>
+        </div>
+        <p>Income support of ₹6,000/year to farmers.</p>
+        <div class="details">
+          Direct benefit transfer of ₹2,000 every 4 months to small and marginal farmers.
+          Covers all farmer families owning cultivable land. Promotes financial stability,
+          assists with farm inputs, and helps prevent distress sales of produce.
+          Requires Aadhaar linking and bank account registration for transfer.
+        </div>
+        <span class="badge"><i class="fa-solid fa-user-check"></i> Eligible: Small/Marginal Farmers</span>
+        <div class="read-more">Read more <i class="fa-solid fa-chevron-down"></i></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="icon-container">
+            <i class="fa-solid fa-shield"></i>
+          </div>
+          <h3>PM Fasal Bima Yojana</h3>
+        </div>
+        <p>Crop insurance against natural calamities.</p>
+        <div class="details">
+          Premium as low as 2% for Kharif and 1.5% for Rabi crops. Covers droughts, floods, pests, and diseases.
+          Enables farmers to recover quickly from crop loss. Government subsidizes premium to reduce burden.
+          Provides financial support to maintain livelihoods during crop failures.
+        </div>
+        <span class="badge"><i class="fa-solid fa-user-check"></i> Eligible: All Farmers</span>
+        <div class="read-more">Read more <i class="fa-solid fa-chevron-down"></i></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="icon-container">
+            <i class="fa-solid fa-droplet"></i>
+          </div>
+          <h3>PM Krishi Sinchai Yojana</h3>
+        </div>
+        <p>Irrigation support for water efficiency.</p>
+        <div class="details">
+          Promotes micro-irrigation like drip and sprinkler systems to save water.
+          Ensures "Per Drop More Crop". Includes assistance for irrigation infrastructure.
+          Reduces dependency on monsoon and improves crop productivity sustainably.
+        </div>
+        <span class="badge"><i class="fa-solid fa-user-check"></i> Eligible: All Farmers</span>
+        <div class="read-more">Read more <i class="fa-solid fa-chevron-down"></i></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="icon-container">
+            <i class="fa-solid fa-leaf"></i>
+          </div>
+          <h3>Soil Health Card Scheme</h3>
+        </div>
+        <p>Soil testing for better fertility management.</p>
+        <div class="details">
+          Provides farmers with soil reports every 2 years to guide fertilizer and nutrient use.
+          Helps improve soil fertility, productivity, and reduces chemical overuse.
+          Advises on crop-specific nutrient requirements and organic amendments.
+        </div>
+        <span class="badge"><i class="fa-solid fa-user-check"></i> Eligible: All Farmers</span>
+        <div class="read-more">Read more <i class="fa-solid fa-chevron-down"></i></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="icon-container">
+            <i class="fa-solid fa-tractor"></i>
+          </div>
+          <h3>Kisan Credit Card</h3>
+        </div>
+        <p>Short-term credit for crop and allied needs.</p>
+        <div class="details">
+          Provides hassle-free credit at low interest rates for seeds, fertilizers, pesticides, and allied activities.
+          Enables purchase of agricultural equipment and livestock support.
+          Flexible repayment schedules, and promotes timely input procurement for higher yields.
+        </div>
+        <span class="badge"><i class="fa-solid fa-user-check"></i> Eligible: All Farmers</span>
+        <div class="read-more">Read more <i class="fa-solid fa-chevron-down"></i></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="icon-container">
+            <i class="fa-solid fa-indian-rupee-sign"></i>
+          </div>
+          <h3>PM Kisan Maandhan Yojana</h3>
+        </div>
+        <p>Pension scheme for farmers above 60 years.</p>
+        <div class="details">
+          Monthly pension of ₹3,000 after 60 years of age.
+          Farmers contribute ₹55–200/month based on age until 60.
+          Ensures social security for small and marginal farmers and provides financial independence in old age.
+        </div>
+        <span class="badge"><i class="fa-solid fa-user-check"></i> Eligible: Farmers 18–40 years</span>
+        <div class="read-more">Read more <i class="fa-solid fa-chevron-down"></i></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="icon-container">
+            <i class="fa-solid fa-seedling"></i>
+          </div>
+          <h3>National Mission on Sustainable Agriculture</h3>
+        </div>
+        <p>Eco-friendly farming practices.</p>
+        <div class="details">
+          Encourages organic farming, water-use efficiency, integrated pest management, and climate resilience.
+          Provides training, subsidies, and technology support.
+          Helps farmers adapt to changing climate while maintaining productivity and sustainability.
+        </div>
+        <span class="badge"><i class="fa-solid fa-user-check"></i> Eligible: All Farmers</span>
+        <div class="read-more">Read more <i class="fa-solid fa-chevron-down"></i></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="icon-container">
+            <i class="fa-solid fa-wheat-awn"></i>
+          </div>
+          <h3>Rashtriya Krishi Vikas Yojana</h3>
+        </div>
+        <p>Support for state-driven agri projects.</p>
+        <div class="details">
+          Provides funds for infrastructure, innovation, crop diversification, and farmer training.
+          Promotes public-private partnerships in agriculture.
+          Encourages sustainable and profitable farming practices at state and district levels.
+        </div>
+        <span class="badge"><i class="fa-solid fa-user-check"></i> Eligible: State-level Farmer Groups</span>
+        <div class="read-more">Read more <i class="fa-solid fa-chevron-down"></i></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="icon-container">
+            <i class="fa-solid fa-bolt"></i>
+          </div>
+          <h3>Solar Pump Subsidy Scheme</h3>
+        </div>
+        <p>Promotes solar-powered irrigation.</p>
+        <div class="details">
+          Subsidy up to 60% for installing solar pumps for irrigation.
+          Reduces dependence on diesel and electricity.
+          Supports renewable energy adoption and lowers long-term irrigation costs.
+        </div>
+        <span class="badge"><i class="fa-solid fa-user-check"></i> Eligible: Farmers with Irrigation Needs</span>
+        <div class="read-more">Read more <i class="fa-solid fa-chevron-down"></i></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="icon-container">
+            <i class="fa-solid fa-user-nurse"></i>
+          </div>
+          <h3>Women Farmer Empowerment Scheme</h3>
+        </div>
+        <p>Special programs for women farmers.</p>
+        <div class="details">
+          Provides training, loans, and subsidies tailored to women farmers.
+          Encourages entrepreneurship, organic farming, and self-help groups.
+          Strengthens socio-economic status of women in agriculture.
+        </div>
+        <span class="badge"><i class="fa-solid fa-user-check"></i> Eligible: Women Farmers</span>
+        <div class="read-more">Read more <i class="fa-solid fa-chevron-down"></i></div>
+      </div>
+
+      <!-- Additional Policies for 15 total -->
+      <div class="card">
+        <div class="card-header">
+          <div class="icon-container">
+            <i class="fa-solid fa-water"></i>
+          </div>
+          <h3>Pradhan Mantri Krishi Sinchai Yojana – Har Khet Ko Pani</h3>
+        </div>
+        <p>Universal irrigation coverage.</p>
+        <div class="details">
+          Aims to provide end-to-end irrigation facilities to every farm.
+          Includes water harvesting, water distribution, and efficient water usage programs.
+          Focuses on sustainable irrigation for crop security.
+        </div>
+        <span class="badge"><i class="fa-solid fa-user-check"></i> Eligible: All Farmers</span>
+        <div class="read-more">Read more <i class="fa-solid fa-chevron-down"></i></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="icon-container">
+            <i class="fa-solid fa-hand-holding-dollar"></i>
+          </div>
+          <h3>Agriculture Infrastructure Fund</h3>
+        </div>
+        <p>Financial support for agri-infrastructure development.</p>
+        <div class="details">
+          Provides medium-long term credit for building warehouses, cold storage, and supply chain infrastructure.
+          Aims to reduce post-harvest losses and improve farmers' income.
+          Supports agribusinesses and farmer producer organizations.
+        </div>
+        <span class="badge"><i class="fa-solid fa-user-check"></i> Eligible: Farmers/Agri-Businesses</span>
+        <div class="read-more">Read more <i class="fa-solid fa-chevron-down"></i></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="icon-container">
+            <i class="fa-solid fa-leaf"></i>
+          </div>
+          <h3>Paramparagat Krishi Vikas Yojana</h3>
+        </div>
+        <p>Organic farming promotion.</p>
+        <div class="details">
+          Encourages cluster-based organic farming.
+          Provides certification, training, and market linkage for organic produce.
+          Promotes chemical-free agriculture and environmental sustainability.
+        </div>
+        <span class="badge"><i class="fa-solid fa-user-check"></i> Eligible: All Farmers</span>
+        <div class="read-more">Read more <i class="fa-solid fa-chevron-down"></i></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="icon-container">
+            <i class="fa-solid fa-seedling"></i>
+          </div>
+          <h3>National Food Security Mission</h3>
+        </div>
+        <p>Enhanced production of rice, wheat, pulses, and coarse cereals.</p>
+        <div class="details">
+          Provides seeds, technology, and extension support to increase productivity.
+          Focuses on food security and improved nutritional outcomes.
+          Assists farmers in adopting modern techniques for higher yields.
+        </div>
+        <span class="badge"><i class="fa-solid fa-user-check"></i> Eligible: All Farmers</span>
+        <div class="read-more">Read more <i class="fa-solid fa-chevron-down"></i></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Toggle details on card click
+    document.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('click', () => {
+        card.classList.toggle('open');
+        
+        // Update read more text
+        const readMore = card.querySelector('.read-more');
+        if (card.classList.contains('open')) {
+          readMore.innerHTML = 'Read less <i class="fa-solid fa-chevron-up"></i>';
+        } else {
+          readMore.innerHTML = 'Read more <i class="fa-solid fa-chevron-down"></i>';
+        }
+      });
+    });
+
+    // Search filter
+    document.getElementById("search").addEventListener("keyup", function() {
+      let value = this.value.toLowerCase();
+      let hasResults = false;
+      
+      document.querySelectorAll(".card").forEach(card => {
+        let text = card.innerText.toLowerCase();
+        if (text.includes(value)) {
+          card.style.display = "block";
+          hasResults = true;
+        } else {
+          card.style.display = "none";
+        }
+      });
+      
+      // Show no results message if needed
+      const noResults = document.getElementById('no-results');
+      if (!hasResults) {
+        if (!noResults) {
+          const noResultsEl = document.createElement('div');
+          noResultsEl.id = 'no-results';
+          noResultsEl.className = 'no-results';
+          noResultsEl.innerHTML = `
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <h3>No policies found</h3>
+            <p>Try different search terms or browse all policies</p>
+          `;
+          document.getElementById('policyList').appendChild(noResultsEl);
+        }
+      } else if (noResults) {
+        noResults.remove();
+      }
+    });
+
+    // Filter buttons (placeholder functionality)
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        // Actual filtering logic would go here
+      });
+    });
+  </script>
+</body>
+</html>
