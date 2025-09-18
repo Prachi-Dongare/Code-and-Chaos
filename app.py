@@ -1,30 +1,28 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
+from flask_cors import CORS
 import os
-
-# Your image model function is in a separate file, so you import it here.
 from model_utils import predict_image
-# Your text model function is in a separate file, so you import it here.
 from nlp_utils import get_answer
 
-# Create the Flask application instance
 app = Flask(__name__)
+CORS(app)
 
-# Configure the SQLite database
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'site.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Initialize the database object
 db = SQLAlchemy(app)
 
-# Define your database models (tables)
+# ---------------- Database Models ----------------
 class Query(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.String(100))
     query_text = db.Column(db.String(500), nullable=True)
     image_path = db.Column(db.String(200), nullable=True)
+    crop_type = db.Column(db.String(100), nullable=True)
+    location = db.Column(db.String(100), nullable=True)
     status = db.Column(db.String(50), default='pending_ai')
     ai_confidence = db.Column(db.Float, nullable=True)
     timestamp = db.Column(db.DateTime, default=db.func.now())
@@ -36,166 +34,192 @@ class Answer(db.Model):
     response_text = db.Column(db.String(1000), nullable=False)
     timestamp = db.Column(db.DateTime, default=db.func.now())
 
-class Expert(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-    specialty = db.Column(db.String(100))
-
-class KnowledgeBase(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    content = db.Column(db.String(5000), nullable=False)
-    tags = db.Column(db.String(500))
-    embeddings = db.Column(db.PickleType, nullable=True)
-
-# A function to check allowed file extensions
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg'}
-
-# Set the upload folder for images
+# ---------------- Upload Config ----------------
 UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Placeholder endpoint for the root URL
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg'}
+
+# ---------------- HTML Page Routes ----------------
 @app.route('/')
 def home():
-    return "<h1>Agri-AI Backend is Running!</h1>"
+    return render_template('dashboard.html')
 
-# API Endpoint for image queries
-@app.route('/api/query/image', methods=['POST'])
-def query_image():
-    if 'file' not in request.files:
-        return jsonify({"error": "No file part in the request"}), 400
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({"error": "No selected file"}), 400
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(file_path)
+@app.route('/login')
+def login_page():
+    return render_template('login.html')
 
-        # Call the real model and use its prediction
-        prediction_result = predict_image(file_path)
-        ai_confidence = prediction_result['confidence']
-        ai_response = {
-            "prediction": prediction_result['prediction'],
-            "confidence": ai_confidence,
-            "solution": "Placeholder: This will be a real solution in the final version."
-        }
+@app.route('/roles')
+def roles_page():
+    return render_template('roles.html')
 
-        new_query = Query(user_id="anonymous", image_path=file_path, status="pending_ai", ai_confidence=ai_confidence)
-        db.session.add(new_query)
-        db.session.commit()
+@app.route('/farmer')
+def farmer_page():
+    return render_template('farmer.html')
 
-        return jsonify({"message": "Image received and is being processed", "result": ai_response}), 200
-    else:
-        return jsonify({"error": "File type not allowed"}), 400
+@app.route('/expert')
+def expert_page():
+    return render_template('expert.html')
 
-# API Endpoint for text queries
+@app.route('/policy')
+def policy_page():
+    return render_template('policy.html')
+
+# ---------------- API Routes ----------------
+
+# Submit text query
 @app.route('/api/query/text', methods=['POST'])
 def query_text():
     data = request.get_json()
     if not data or 'query' not in data:
-        return jsonify({"error": "Missing 'query' in request body"}), 400
-    query_text = data.get('query')
-    
-    if not data or 'query' not in data:
-        return jsonify({"error": "Missing 'query' in request body"}), 400
+        return jsonify({"error": "Missing query"}), 400
 
-    query_text = data.get('query')
-    # Add a line to get the region from the request
-    region = data.get('region')
-    # ... (rest of the function)
+    query_text = data['query']
+    region = data.get('region', "Unknown")
+    user_id = data.get('user_id', "anonymous")
 
-    # Call the real NLP model and use its prediction
-    prediction_result = get_answer(query_text)
-    ai_confidence = prediction_result['confidence']
-    ai_response = {
-        "answer": prediction_result['answer'],
-        "confidence": ai_confidence,
-        "recommendations": prediction_result['recommendations']
-    }
-    
-    new_query = Query(user_id="anonymous", query_text=query_text, status="pending_ai", ai_confidence=ai_confidence)
+    # Save query
+    new_query = Query(user_id=user_id, query_text=query_text, location=region, status="pending_ai")
     db.session.add(new_query)
     db.session.commit()
 
-    return jsonify({"message": "Query received and is being processed", "result": ai_response}), 200
+    # AI tries to answer
+    ai_result = get_answer(query_text)
+    ai_conf = ai_result.get('confidence', 0)
+    ai_answer_text = ai_result.get('answer', '')
 
+    if ai_conf >= 0.6 and "Unknown" not in ai_answer_text:
+        # AI answered
+        new_query.status = 'ai_answered'
+        new_query.ai_confidence = ai_conf
+        db.session.commit()
+        answer = Answer(query_id=new_query.id, responder_type='AI', response_text=ai_answer_text)
+        db.session.add(answer)
+        db.session.commit()
+        return jsonify({
+            "message": "AI answered the query",
+            "query_id": new_query.id,
+            "answer": ai_answer_text,
+            "confidence": ai_conf,
+            "status": new_query.status
+        }), 200
+    else:
+        # Escalate to expert
+        new_query.status = 'escalated'
+        new_query.ai_confidence = ai_conf
+        db.session.commit()
+        return jsonify({
+            "message": "Query escalated to expert",
+            "query_id": new_query.id,
+            "status": new_query.status
+        }), 200
+
+# Submit image query
+@app.route('/api/query/image', methods=['POST'])
+def query_image():
+    if 'image' not in request.files:
+        return jsonify({"error": "No image uploaded"}), 400
+
+    file = request.files['image']
+    region = request.form.get('region', "Unknown")
+    user_id = request.form.get('user_id', "anonymous")
+
+    if file.filename == '' or not allowed_file(file.filename):
+        return jsonify({"error": "Invalid image"}), 400
+
+    filename = secure_filename(file.filename)
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    file.save(filepath)
+
+    # Save query
+    new_query = Query(user_id=user_id, image_path=filepath, location=region, status="pending_ai")
+    db.session.add(new_query)
+    db.session.commit()
+
+    # AI prediction from image
+    ai_result = predict_image(filepath)
+    ai_conf = ai_result.get('confidence', 0)
+    ai_answer_text = ai_result.get('answer', '')
+
+    if ai_conf >= 0.6 and "Unknown" not in ai_answer_text:
+        new_query.status = 'ai_answered'
+        new_query.ai_confidence = ai_conf
+        db.session.commit()
+        answer = Answer(query_id=new_query.id, responder_type='AI', response_text=ai_answer_text)
+        db.session.add(answer)
+        db.session.commit()
+        return jsonify({
+            "message": "AI answered the image query",
+            "query_id": new_query.id,
+            "answer": ai_answer_text,
+            "confidence": ai_conf,
+            "status": new_query.status
+        }), 200
+    else:
+        new_query.status = 'escalated'
+        new_query.ai_confidence = ai_conf
+        db.session.commit()
+        return jsonify({
+            "message": "Image query escalated to expert",
+            "query_id": new_query.id,
+            "status": new_query.status
+        }), 200
+
+# Expert reply
 @app.route('/api/expert/reply', methods=['POST'])
 def expert_reply():
     data = request.get_json()
     if not data or 'query_id' not in data or 'response_text' not in data:
-        return jsonify({"error": "Missing required fields"}), 400
+        return jsonify({"error": "Missing fields"}), 400
 
-    query_id = data.get('query_id')
-    response_text = data.get('response_text')
-    
-    # Update the original query's status
+    query_id = data['query_id']
+    response_text = data['response_text']
+
     query = Query.query.get(query_id)
     if not query:
         return jsonify({"error": "Query not found"}), 404
 
     query.status = 'expert_answered'
-
-    # Save the expert's answer
-    new_answer = Answer(
-        query_id=query_id,
-        responder_type='Expert',
-        response_text=response_text
-    )
-    db.session.add(new_answer)
+    db.session.commit()
+    answer = Answer(query_id=query_id, responder_type='Expert', response_text=response_text)
+    db.session.add(answer)
     db.session.commit()
 
-    # The KnowledgeBase model will be populated with this answer later
-    # For now, just a placeholder.
-    
-    return jsonify({"message": "Expert reply saved successfully", "query_id": query_id}), 200
+    return jsonify({"message": "Expert replied successfully", "query_id": query_id}), 200
 
-# API Endpoint to get overall query trends
-@app.route('/api/dashboard/metrics', methods=['GET'])
-def get_dashboard_metrics():
-    # Get total number of queries
-    total_queries = Query.query.count()
-    
-    # Get queries answered by AI vs. Expert
-    ai_answered = Query.query.filter_by(status='ai_answered').count()
-    expert_answered = Query.query.filter_by(status='expert_answered').count()
-    
-    # Calculate automation rate
-    automation_rate = (ai_answered / total_queries) * 100 if total_queries > 0 else 0
-    
-    # Get the most common queries (based on keywords)
-    # This is a simple placeholder to show a query trend.
-    top_issues = ["Yellowing Leaves", "Aphids", "Overwatering"]
+# Get escalated queries for expert page
+@app.route('/api/dashboard/escalated', methods=['GET'])
+def get_escalated_queries():
+    queries = Query.query.filter_by(status="escalated").order_by(Query.timestamp.desc()).all()
+    return jsonify([
+        {
+            "id": q.id,
+            "query_text": q.query_text,
+            "image_path": q.image_path,
+            "timestamp": q.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
+            "location": q.location,
+            "user_id": q.user_id
+        } for q in queries
+    ]), 200
 
-    return jsonify({
-        "total_queries": total_queries,
-        "ai_answered": ai_answered,
-        "expert_answered": expert_answered,
-        "automation_rate": round(automation_rate, 2),
-        "top_issues": top_issues
-    }), 200
+# Get answered queries for farmer page
+@app.route('/api/farmer/answers', methods=['GET'])
+def get_answers():
+    answers = Answer.query.join(Query, Answer.query_id==Query.id)\
+        .filter(Query.user_id=="anonymous")\
+        .order_by(Answer.timestamp.desc()).all()
+    return jsonify([
+        {
+            "query_id": a.query_id,
+            "response_text": a.response_text,
+            "responder_type": a.responder_type,
+            "timestamp": a.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+        } for a in answers
+    ]), 200
 
-# API Endpoint to get a list of all queries for expert review
-@app.route('/api/dashboard/queries', methods=['GET'])
-def get_all_queries():
-    queries = Query.query.order_by(Query.timestamp.desc()).all()
-    queries_list = []
-    for query in queries:
-        queries_list.append({
-            "id": query.id,
-            "query_text": query.query_text,
-            "image_path": query.image_path,
-            "status": query.status,
-            "ai_confidence": query.ai_confidence,
-            "timestamp": query.timestamp.strftime("%Y-%m-%d %H:%M:%S")
-        })
-    return jsonify(queries_list), 200
-
-# Run the application
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
