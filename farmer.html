@@ -6,6 +6,7 @@
   <title>AgriAi - Farmer Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+    /* ---------- CSS as before ---------- */
     :root {
       --primary: #2e8b57;
       --primary-dark: #246b45;
@@ -29,1062 +30,309 @@
       --shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
     }
     
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;}
+    body { background: linear-gradient(to bottom, var(--primary-light), var(--bg)); color: var(--text); min-height:100vh; transition: var(--transition);}
+    
+    /* Navbar */
+    .navbar { display:flex; justify-content:space-between; align-items:center; padding:1rem 2rem; background: rgba(255,255,255,0.95); backdrop-filter:blur(10px); position:sticky; top:0; z-index:100; box-shadow:0 2px 10px rgba(0,0,0,0.1); transition: var(--transition);}
+    .dark .navbar { background: rgba(30,30,30,0.95); box-shadow: 0 2px 10px rgba(0,0,0,0.3);}
+    .logo { font-size:1.8rem; font-weight:700; color:var(--primary); display:flex; align-items:center; gap:0.5rem;}
+    .nav-links { list-style:none; display:flex; gap:1.5rem;}
+    .nav-links a { text-decoration:none; color:var(--text); font-weight:500; padding:0.5rem 0; position:relative; transition: var(--transition);}
+    .nav-links a::after { content:''; position:absolute; bottom:0; left:0; width:0; height:2px; background:var(--primary); transition: var(--transition);}
+    .nav-links a:hover::after { width:100%;}
+    .nav-links a:hover { color:var(--primary);}
+    .user-actions { display:flex; align-items:center; gap:1rem;}
+    #darkToggle, #languageToggle { background:none; border:none; font-size:1.2rem; cursor:pointer; transition: var(--transition); padding:0.5rem; border-radius:50%; background: var(--primary-light);}
+    #darkToggle:hover, #languageToggle:hover { transform: rotate(15deg);}
+    
+    /* Main container */
+    .container { max-width:1400px; margin:2rem auto; padding:0 1.5rem; display:grid; grid-template-columns:1fr 350px; gap:2rem;}
+    @media(max-width:1100px) { .container { grid-template-columns:1fr; } }
+    
+    /* Panels */
+    .query-panel, .response-panel, .history-panel { background: var(--card-bg); border-radius:20px; padding:2rem; box-shadow: var(--shadow); transition: var(--transition); margin-bottom:2rem; }
+    .query-panel h2, .response-panel h2, .history-panel h2 { margin-bottom:1.5rem; color: var(--primary); display:flex; align-items:center; gap:0.5rem;}
+    
+    .input-methods { display:flex; gap:0.5rem; margin-bottom:1.5rem; }
+    .input-btn { flex:1; padding:0.8rem; border:2px solid var(--primary-light); background:transparent; border-radius:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; transition:var(--transition);}
+    .input-btn.active { background: var(--primary-light); border-color: var(--primary); color: var(--primary);}
+    .input-btn:hover { border-color: var(--primary);}
+    
+    .text-input { width:100%; min-height:150px; padding:1rem; border:1px solid #ddd; border-radius:10px; resize: vertical; margin-bottom:1rem; transition:var(--transition);}
+    .dark .text-input { border-color:#444; background: rgba(50,50,50,0.8); color:var(--text);}
+    .text-input:focus { outline:none; border-color: var(--primary); box-shadow:0 0 0 3px rgba(46,139,87,0.2);}
+    
+    .action-btn { width:100%; padding:1rem; border:none; border-radius:10px; background: var(--primary); color:white; font-size:1.1rem; font-weight:600; cursor:pointer; transition: var(--transition); margin-top:1rem; display:flex; align-items:center; justify-content:center; gap:0.5rem;}
+    .action-btn:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow:0 5px 15px rgba(46,139,87,0.3);}
+    
+    /* Chat container */
+    .chat-container { min-height:300px; max-height:500px; overflow-y:auto; padding:1rem; border-radius:10px; background: rgba(0,0,0,0.03); margin-bottom:1.5rem; transition: var(--transition);}
+    .dark .chat-container { background: rgba(255,255,255,0.05);}
+    .message { margin-bottom:1.5rem; padding:1rem; border-radius:10px; max-width:80%;}
+    .message.user { background: var(--primary-light); margin-left:auto; border-bottom-right-radius:0;}
+    .message.ai { background: rgba(70,130,180,0.1); margin-right:auto; border-bottom-left-radius:0;}
+    .message-header { display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.9rem; color: var(--text-light);}
+    
+    .confidence-meter { margin:1rem 0;}
+    .meter-label { font-size:0.9rem; margin-bottom:0.5rem; color: var(--text-light);}
+    .meter-bar { height:10px; background:#eee; border-radius:5px; overflow:hidden;}
+    .dark .meter-bar { background:#444;}
+    .meter-fill { height:100%; background: var(--primary); border-radius:5px; width:0%; transition: width 1s ease;}
+    .meter-value { font-size:0.9rem; text-align:right; margin-top:0.5rem; color: var(--text-light);}
+    
+    .escalation-notice { background:#fff3cd; color:#856404; padding:1rem; border-radius:8px; margin-top:1rem; border-left:4px solid #ffc107; display:none; align-items:center; gap:0.5rem;}
+    
+    /* History panel */
+    .history-list { max-height:600px; overflow-y:auto;}
+    .history-item { padding:1rem; border-left:4px solid var(--primary); margin-bottom:1rem; border-radius:0 8px 8px 0; background: rgba(0,0,0,0.03); transition: var(--transition); cursor:pointer;}
+    .dark .history-item { background: rgba(255,255,255,0.05);}
+    .history-item:hover { transform: translateX(5px);}
+    
+    .status-resolved { background:#e8f5e9; color:#2e7d32;}
+    .status-pending { background:#fff3cd; color:#856404;}
+    .status-escalated { background:#ffebee; color:#c62828;}
+    
+    /* Notifications */
+    .notification { position:fixed; top:20px; right:20px; padding:1rem 1.5rem; border-radius:10px; background: var(--card-bg); box-shadow: var(--shadow); display:flex; align-items:center; gap:0.5rem; z-index:1000; transform:translateX(150%); transition: transform 0.3s ease;}
+    .notification.show { transform:translateX(0);}
+    .notification.success { border-left:4px solid var(--primary);}
+    .notification.error { border-left:4px solid #f44336;}
     
-    body {
-      background: linear-gradient(to bottom, var(--primary-light), var(--bg));
-      color: var(--text);
-      min-height: 100vh;
-      transition: var(--transition);
-    }
-    
-    /* Navigation */
-    .navbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 2rem;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      transition: var(--transition);
-    }
-    
-    .dark .navbar {
-      background: rgba(30, 30, 30, 0.95);
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-    }
-    
-    .logo {
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: var(--primary);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    
-    .nav-links {
-      list-style: none;
-      display: flex;
-      gap: 1.5rem;
-    }
-    
-    .nav-links a {
-      text-decoration: none;
-      color: var(--text);
-      font-weight: 500;
-      padding: 0.5rem 0;
-      position: relative;
-      transition: var(--transition);
-    }
-    
-    .nav-links a::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: var(--primary);
-      transition: var(--transition);
-    }
-    
-    .nav-links a:hover::after {
-      width: 100%;
-    }
-    
-    .nav-links a:hover {
-      color: var(--primary);
-    }
-    
-    .user-actions {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    
-    #darkToggle, #languageToggle {
-      background: none;
-      border: none;
-      font-size: 1.2rem;
-      cursor: pointer;
-      transition: var(--transition);
-      padding: 0.5rem;
-      border-radius: 50%;
-      background: var(--primary-light);
-    }
-    
-    #darkToggle:hover, #languageToggle:hover {
-      transform: rotate(15deg);
-    }
-    
-    /* Main Content */
-    .container {
-      max-width: 1400px;
-      margin: 2rem auto;
-      padding: 0 1.5rem;
-      display: grid;
-      grid-template-columns: 1fr 350px;
-      gap: 2rem;
-    }
-    
-    @media (max-width: 1100px) {
-      .container {
-        grid-template-columns: 1fr;
-      }
-    }
-    
-    /* Query Panel */
-    .query-panel {
-      background: var(--card-bg);
-      border-radius: 20px;
-      padding: 2rem;
-      box-shadow: var(--shadow);
-      transition: var(--transition);
-      margin-bottom: 2rem;
-    }
-    
-    .query-panel h2 {
-      margin-bottom: 1.5rem;
-      color: var(--primary);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    
-    .input-methods {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 1.5rem;
-    }
-    
-    .input-btn {
-      flex: 1;
-      padding: 0.8rem;
-      border: 2px solid var(--primary-light);
-      background: transparent;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: var(--transition);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-    
-    .input-btn.active {
-      background: var(--primary-light);
-      border-color: var(--primary);
-      color: var(--primary);
-    }
-    
-    .input-btn:hover {
-      border-color: var(--primary);
-    }
-    
-    .text-input {
-      width: 100%;
-      min-height: 150px;
-      padding: 1rem;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      resize: vertical;
-      margin-bottom: 1rem;
-      transition: var(--transition);
-    }
-    
-    .dark .text-input {
-      border-color: #444;
-      background: rgba(50, 50, 50, 0.8);
-      color: var(--text);
-    }
-    
-    .text-input:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.2);
-    }
-    
-    .upload-area {
-      border: 2px dashed #ccc;
-      border-radius: 10px;
-      padding: 2rem;
-      text-align: center;
-      cursor: pointer;
-      transition: var(--transition);
-      margin-bottom: 1rem;
-    }
-    
-    .dark .upload-area {
-      border-color: #555;
-    }
-    
-    .upload-area:hover {
-      border-color: var(--primary);
-    }
-    
-    .upload-area i {
-      font-size: 3rem;
-      color: var(--primary);
-      margin-bottom: 1rem;
-    }
-    
-    .voice-input {
-      text-align: center;
-      padding: 2rem;
-      border: 2px solid var(--primary-light);
-      border-radius: 10px;
-      margin-bottom: 1rem;
-      transition: var(--transition);
-    }
-    
-    .voice-input.active {
-      border-color: var(--primary);
-      background: var(--primary-light);
-    }
-    
-    .voice-input i {
-      font-size: 2.5rem;
-      color: var(--primary);
-      cursor: pointer;
-    }
-    
-    .action-btn {
-      width: 100%;
-      padding: 1rem;
-      border: none;
-      border-radius: 10px;
-      background: var(--primary);
-      color: white;
-      font-size: 1.1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-      margin-top: 1rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-    
-    .action-btn:hover {
-      background: var(--primary-dark);
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(46, 139, 87, 0.3);
-    }
-    
-    .action-btn:active {
-      transform: translateY(0);
-    }
-    
-    /* AI Response Panel */
-    .response-panel {
-      background: var(--card-bg);
-      border-radius: 20px;
-      padding: 2rem;
-      box-shadow: var(--shadow);
-      transition: var(--transition);
-      margin-bottom: 2rem;
-    }
-    
-    .response-panel h2 {
-      margin-bottom: 1.5rem;
-      color: var(--primary);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    
-    .chat-container {
-      min-height: 300px;
-      max-height: 500px;
-      overflow-y: auto;
-      padding: 1rem;
-      border-radius: 10px;
-      background: rgba(0, 0, 0, 0.03);
-      margin-bottom: 1.5rem;
-      transition: var(--transition);
-    }
-    
-    .dark .chat-container {
-      background: rgba(255, 255, 255, 0.05);
-    }
-    
-    .message {
-      margin-bottom: 1.5rem;
-      padding: 1rem;
-      border-radius: 10px;
-      max-width: 80%;
-    }
-    
-    .message.user {
-      background: var(--primary-light);
-      margin-left: auto;
-      border-bottom-right-radius: 0;
-    }
-    
-    .message.ai {
-      background: rgba(70, 130, 180, 0.1);
-      margin-right: auto;
-      border-bottom-left-radius: 0;
-    }
-    
-    .message-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 0.5rem;
-      font-size: 0.9rem;
-      color: var(--text-light);
-    }
-    
-    .confidence-meter {
-      margin: 1rem 0;
-    }
-    
-    .meter-label {
-      font-size: 0.9rem;
-      margin-bottom: 0.5rem;
-      color: var(--text-light);
-    }
-    
-    .meter-bar {
-      height: 10px;
-      background: #eee;
-      border-radius: 5px;
-      overflow: hidden;
-    }
-    
-    .dark .meter-bar {
-      background: #444;
-    }
-    
-    .meter-fill {
-      height: 100%;
-      background: var(--primary);
-      border-radius: 5px;
-      width: 0%;
-      transition: width 1s ease;
-    }
-    
-    .meter-value {
-      font-size: 0.9rem;
-      text-align: right;
-      margin-top: 0.5rem;
-      color: var(--text-light);
-    }
-    
-    .escalation-notice {
-      background: #fff3cd;
-      color: #856404;
-      padding: 1rem;
-      border-radius: 8px;
-      margin-top: 1rem;
-      border-left: 4px solid #ffc107;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    
-    .dark .escalation-notice {
-      background: rgba(255, 193, 7, 0.1);
-      color: #ffc107;
-    }
-    
-    /* Feedback Section */
-    .feedback-section {
-      display: flex;
-      gap: 1rem;
-      margin-top: 1.5rem;
-    }
-    
-    .feedback-btn {
-      flex: 1;
-      padding: 0.8rem;
-      border: 2px solid #ddd;
-      background: transparent;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: var(--transition);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-    
-    .feedback-btn:hover {
-      border-color: var(--primary);
-    }
-    
-    .feedback-btn.positive:hover {
-      background: #e8f5e9;
-    }
-    
-    .feedback-btn.negative:hover {
-      background: #ffebee;
-    }
-    
-    /* Query History */
-    .history-panel {
-      background: var(--card-bg);
-      border-radius: 20px;
-      padding: 2rem;
-      box-shadow: var(--shadow);
-      transition: var(--transition);
-      height: fit-content;
-      position: sticky;
-      top: 100px;
-    }
-    
-    .history-panel h2 {
-      margin-bottom: 1.5rem;
-      color: var(--primary);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    
-    .history-list {
-      max-height: 600px;
-      overflow-y: auto;
-    }
-    
-    .history-item {
-      padding: 1rem;
-      border-left: 4px solid var(--primary);
-      margin-bottom: 1rem;
-      border-radius: 0 8px 8px 0;
-      background: rgba(0, 0, 0, 0.03);
-      transition: var(--transition);
-      cursor: pointer;
-    }
-    
-    .dark .history-item {
-      background: rgba(255, 255, 255, 0.05);
-    }
-    
-    .history-item:hover {
-      transform: translateX(5px);
-    }
-    
-    .history-item.resolved {
-      border-left-color: var(--primary);
-    }
-    
-    .history-item.pending {
-      border-left-color: var(--secondary);
-    }
-    
-    .history-item.escalated {
-      border-left-color: #f44336;
-    }
-    
-    .history-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 0.5rem;
-    }
-    
-    .history-type {
-      font-size: 0.9rem;
-      color: var(--text-light);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    
-    .history-time {
-      font-size: 0.8rem;
-      color: var(--text-light);
-    }
-    
-    .history-text {
-      margin-bottom: 0.5rem;
-      font-size: 0.95rem;
-    }
-    
-    .history-status {
-      font-size: 0.8rem;
-      padding: 0.3rem 0.6rem;
-      border-radius: 20px;
-      display: inline-block;
-    }
-    
-    .status-resolved {
-      background: #e8f5e9;
-      color: #2e7d32;
-    }
-    
-    .status-pending {
-      background: #fff3cd;
-      color: #856404;
-    }
-    
-    .status-escalated {
-      background: #ffebee;
-      color: #c62828;
-    }
-    
-    /* Offline Notice */
-    .offline-notice {
-      background: var(--primary-light);
-      padding: 1rem;
-      border-radius: 10px;
-      margin-top: 2rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    
-    /* Notification */
-    .notification {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      padding: 1rem 1.5rem;
-      border-radius: 10px;
-      background: var(--card-bg);
-      box-shadow: var(--shadow);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      z-index: 1000;
-      transform: translateX(150%);
-      transition: transform 0.3s ease;
-    }
-    
-    .notification.show {
-      transform: translateX(0);
-    }
-    
-    .notification.success {
-      border-left: 4px solid var(--primary);
-    }
-    
-    .notification.error {
-      border-left: 4px solid #f44336;
-    }
-    
-    /* Animations */
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
-    @keyframes pulse {
-      0% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.05);
-      }
-      100% {
-        transform: scale(1);
-      }
-    }
-    
-    .pulse {
-      animation: pulse 2s infinite;
-    }
-    
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      .navbar {
-        padding: 1rem;
-        flex-direction: column;
-        gap: 1rem;
-      }
-      
-      .nav-links {
-        gap: 1rem;
-      }
-      
-      .container {
-        padding: 0 1rem;
-        grid-template-columns: 1fr;
-      }
-      
-      .input-methods {
-        flex-direction: column;
-      }
-      
-      .history-panel {
-        position: static;
-      }
-    }
   </style>
 </head>
 <body>
-  <!-- Navigation -->
   <nav class="navbar">
-    <div class="logo">
-      <i class="fas fa-leaf"></i> AgriAi
-    </div>
+    <div class="logo"><i class="fas fa-leaf"></i> AgriAi</div>
     <ul class="nav-links">
       <li><a href="#" class="active">Dashboard</a></li>
       <li><a href="#">Analytics</a></li>
       <li><a href="#">Help/FAQ</a></li>
     </ul>
     <div class="user-actions">
-      <button id="languageToggle" title="Change language">
-        EN 🇬🇧
-      </button>
-      <button id="darkToggle" title="Toggle dark mode">
-        <i class="fas fa-moon"></i>
-      </button>
-      <button class="btn-outline">
-        <i class="fas fa-user"></i> Farmer Profile
-      </button>
+      <button id="languageToggle" title="Change language">EN 🇬🇧</button>
+      <button id="darkToggle" title="Toggle dark mode"><i class="fas fa-moon"></i></button>
+      <button class="btn-outline"><i class="fas fa-user"></i> Farmer Profile</button>
     </div>
   </nav>
 
-  <!-- Main Content -->
   <div class="container">
-    <!-- Main Content Area -->
     <div class="main-content">
       <!-- Query Panel -->
       <div class="query-panel">
         <h2><i class="fas fa-question-circle"></i> Ask Your Question</h2>
-        
         <div class="input-methods">
-          <button class="input-btn active" data-input="text">
-            <i class="fas fa-keyboard"></i> Text
-          </button>
-          <button class="input-btn" data-input="image">
-            <i class="fas fa-camera"></i> Image
-          </button>
-          <button class="input-btn" data-input="voice">
-            <i class="fas fa-microphone"></i> Voice
-          </button>
+          <button class="input-btn active" data-input="text"><i class="fas fa-keyboard"></i> Text</button>
+          <button class="input-btn" data-input="voice"><i class="fas fa-microphone"></i> Voice</button>
         </div>
-        
-        <!-- Text Input -->
+        <!-- Inside your Query Panel, below the textarea -->
+         <div class="image-upload-section" style="margin-bottom:1rem;">
+           <label for="imageInput" style="display:block; margin-bottom:0.5rem; font-weight:500;">
+             Or upload an image of your crop:
+            </label>
+          <input type="file" id="imageInput" accept="image/png, image/jpeg, image/jpg" style="display:block;">
+          </div>
+
         <div class="input-content text-input-content">
-          <textarea class="text-input" placeholder="Type your crop question here... Example: Why are my wheat leaves turning yellow?"></textarea>
+          <textarea class="text-input" placeholder="Type your crop question here..."></textarea>
+          <input type="hidden" id="userRegion" value="Maharashtra">
+          <input type="hidden" id="userId" value="anonymous">
         </div>
-        
-        <!-- Image Input -->
-        <div class="input-content image-input-content" style="display: none;">
-          <div class="upload-area">
-            <i class="fas fa-cloud-upload-alt"></i>
-            <p>Click to upload or drag & drop</p>
-            <p>JPG, PNG up to 5MB</p>
-          </div>
-          <div class="image-preview" style="display: none;">
-            <img src="#" alt="Preview" style="max-width: 100%; border-radius: 8px; margin-top: 1rem;">
-          </div>
+        <div class="input-content voice-input-content" style="display:none;">
+          <div class="voice-input"><i class="fas fa-microphone"></i><p>Click microphone and speak</p></div>
         </div>
-        
-        <!-- Voice Input -->
-        <div class="input-content voice-input-content" style="display: none;">
-          <div class="voice-input">
-            <i class="fas fa-microphone"></i>
-            <p>Click the microphone and speak your question</p>
-            <p class="recording-status">Not recording</p>
-          </div>
-        </div>
-        
-        <button class="action-btn" id="submitQuery">
-          <i class="fas fa-paper-plane"></i> Submit Question
-        </button>
+        <button class="action-btn" id="submitQuery"><i class="fas fa-paper-plane"></i> Submit Question</button>
       </div>
-      
-      <!-- AI Response Panel -->
+
+      <!-- Response Panel -->
       <div class="response-panel">
         <h2><i class="fas fa-robot"></i> AI Advice</h2>
-        
         <div class="chat-container">
           <div class="message ai">
-            <div class="message-header">
-              <span>AgriAi Assistant</span>
-              <span>Just now</span>
-            </div>
-            <p>Hello! I'm here to help with your farming questions. Ask me about crops, pests, irrigation, or anything else related to farming.</p>
+            <div class="message-header"><span>AgriAi Assistant</span><span>Just now</span></div>
+            <p>Hello! Ask me about crops, pests, irrigation, or anything related to farming.</p>
           </div>
-          <!-- Responses will be added here dynamically -->
         </div>
-        
         <div class="confidence-meter">
           <div class="meter-label">AI Confidence Level:</div>
-          <div class="meter-bar">
-            <div class="meter-fill" style="width: 0%"></div>
-          </div>
+          <div class="meter-bar"><div class="meter-fill"></div></div>
           <div class="meter-value">0%</div>
         </div>
-        
-        <div class="escalation-notice" style="display: none;">
-          <i class="fas fa-exclamation-triangle"></i>
-          <div>This query has been escalated to an expert. You will receive a response shortly.</div>
-        </div>
-        
-        <div class="feedback-section">
-          <button class="feedback-btn positive">
-            <i class="fas fa-thumbs-up"></i> Helpful
-          </button>
-          <button class="feedback-btn negative">
-            <i class="fas fa-thumbs-down"></i> Not Helpful
-          </button>
-        </div>
+        <div class="escalation-notice"><i class="fas fa-exclamation-triangle"></i><div>This query has been escalated to an expert. You will receive a response shortly.</div></div>
       </div>
     </div>
-    
-    <!-- Query History Panel -->
+
+    <!-- History Panel -->
     <div class="history-panel">
       <h2><i class="fas fa-history"></i> Query History</h2>
-      
       <div class="history-list">
-        <div class="history-item resolved">
-          <div class="history-header">
-            <div class="history-type">
-              <i class="fas fa-keyboard"></i> Text
-            </div>
-            <div class="history-time">2 hours ago</div>
-          </div>
-          <div class="history-text">How often should I water my tomato plants in summer?</div>
-          <span class="history-status status-resolved">Resolved</span>
-        </div>
-        
-        <div class="history-item escalated">
-          <div class="history-header">
-            <div class="history-type">
-              <i class="fas fa-camera"></i> Image
-            </div>
-            <div class="history-time">1 day ago</div>
-          </div>
-          <div class="history-text">What is this pest on my wheat crop?</div>
-          <span class="history-status status-escalated">With Expert</span>
-        </div>
-        
-        <div class="history-item resolved">
-          <div class="history-header">
-            <div class="history-type">
-              <i class="fas fa-keyboard"></i> Text
-            </div>
-            <div class="history-time">2 days ago</div>
-          </div>
-          <div class="history-text">Best fertilizer for mango trees?</div>
-          <span class="history-status status-resolved">Resolved</span>
-        </div>
-        
-        <div class="history-item pending">
-          <div class="history-header">
-            <div class="history-type">
-              <i class="fas fa-microphone"></i> Voice
-            </div>
-            <div class="history-time">3 days ago</div>
-          </div>
-          <div class="history-text">How to treat brown spots on rice leaves?</div>
-          <span class="history-status status-pending">Processing</span>
-        </div>
-      </div>
-      
-      <div class="offline-notice">
-        <i class="fas fa-wifi"></i>
-        <div>Works even with low internet — queries saved and sent later</div>
+        <!-- Loaded dynamically -->
       </div>
     </div>
   </div>
 
   <!-- Notification -->
-  <div class="notification">
-    <i class="fas fa-check-circle"></i>
-    <div class="notification-content">Your message here</div>
-  </div>
+  <div class="notification" id="notification"><i class="fas fa-info-circle"></i><span id="notificationText">Notification text</span></div>
+<script>
+ // ---------- JS Code ----------
+const darkToggle = document.getElementById('darkToggle');
+darkToggle.addEventListener('click', () => document.body.classList.toggle('dark'));
 
-  <script>
-    // DOM Elements
-    const darkToggle = document.getElementById('darkToggle');
-    const inputButtons = document.querySelectorAll('.input-btn');
-    const inputContents = document.querySelectorAll('.input-content');
-    const submitBtn = document.getElementById('submitQuery');
-    const chatContainer = document.querySelector('.chat-container');
-    const confidenceMeter = document.querySelector('.meter-fill');
-    const confidenceValue = document.querySelector('.meter-value');
-    const escalationNotice = document.querySelector('.escalation-notice');
-    const feedbackButtons = document.querySelectorAll('.feedback-btn');
-    const notification = document.querySelector('.notification');
-    
-    // Sample responses for different query types
-    const sampleResponses = {
-      wheat: {
-        text: "Yellowing wheat leaves could indicate nitrogen deficiency or fungal infection. Consider soil testing and applying balanced fertilizer. If patterns suggest disease, fungicide application may be needed.",
-        confidence: 75
-      },
-      tomato: {
-        text: "For tomatoes in summer, water deeply 2-3 times per week, ensuring soil is moist but not waterlogged. Mulch around plants to retain moisture and prevent evaporation.",
-        confidence: 90
-      },
-      pest: {
-        text: "This appears to be aphid damage. Consider introducing natural predators like ladybugs, or use neem oil spray. For severe infestations, appropriate insecticides may be necessary.",
-        confidence: 65
-      },
-      default: {
-        text: "Based on our knowledge base, I recommend consulting with a local agricultural expert for your specific situation. Your query has been forwarded to an expert for detailed advice.",
-        confidence: 45
-      }
-    };
-    
-    // Dark Mode Toggle
-    darkToggle.addEventListener('click', () => {
-      document.body.classList.toggle('dark');
-      if (document.body.classList.contains('dark')) {
-        darkToggle.innerHTML = '<i class="fas fa-sun"></i>';
-      } else {
-        darkToggle.innerHTML = '<i class="fas fa-moon"></i>';
-      }
-    });
-    
-    // Language Toggle
-    document.getElementById('languageToggle').addEventListener('click', function() {
-      if (this.textContent === 'EN 🇬🇧') {
-        this.textContent = 'HI 🇮🇳';
-        showNotification('Language changed to Hindi', 'success');
-      } else {
-        this.textContent = 'EN 🇬🇧';
-        showNotification('Language changed to English', 'success');
-      }
-    });
-    
-    // Input Method Switching
-    inputButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        const inputType = button.dataset.input;
-        
-        // Update active button
-        inputButtons.forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
-        
-        // Show corresponding input content
-        inputContents.forEach(content => {
-          if (content.classList.contains(`${inputType}-input-content`)) {
-            content.style.display = 'block';
-          } else {
-            content.style.display = 'none';
-          }
-        });
-      });
-    });
-    
-    // Submit Query
-    submitBtn.addEventListener('click', () => {
-      const activeInput = document.querySelector('.input-btn.active').dataset.input;
-      let queryText = '';
-      
-      if (activeInput === 'text') {
-        queryText = document.querySelector('.text-input').value.trim();
-      } else if (activeInput === 'voice') {
-        queryText = "Voice query about crop issues"; // Simulated voice-to-text
-      } else {
-        queryText = "Image query about plant health"; // Simulated image analysis
-      }
-      
-      if (!queryText) {
-        showNotification('Please enter a question first', 'error');
-        return;
-      }
-      
-      // Add user message to chat
-      addMessage(queryText, 'user', activeInput);
-      
-      // Clear input
-      if (activeInput === 'text') {
-        document.querySelector('.text-input').value = '';
-      }
-      
-      // Show loading state
-      const loadingMsg = document.createElement('div');
-      loadingMsg.className = 'message ai';
-      loadingMsg.innerHTML = `
-        <div class="message-header">
-          <span>AgriAi Assistant</span>
-          <span>Just now</span>
-        </div>
-        <p><i class="fas fa-spinner fa-spin"></i> Analyzing your question...</p>
-      `;
-      chatContainer.appendChild(loadingMsg);
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-      
-      // Simulate AI processing delay
-      setTimeout(() => {
-        // Remove loading message
-        chatContainer.removeChild(loadingMsg);
-        
-        // Generate AI response based on query content
-        let response = sampleResponses.default;
-        let confidence = response.confidence;
-        
-        if (queryText.toLowerCase().includes('wheat')) {
-          response = sampleResponses.wheat;
-        } else if (queryText.toLowerCase().includes('tomato')) {
-          response = sampleResponses.tomato;
-        } else if (queryText.toLowerCase().includes('pest') || queryText.toLowerCase().includes('insect')) {
-          response = sampleResponses.pest;
-        }
-        
-        // Add AI response to chat
-        addMessage(response.text, 'ai');
-        
-        // Update confidence meter
-        confidenceMeter.style.width = `${response.confidence}%`;
-        confidenceValue.textContent = `${response.confidence}%`;
-        
-        // Show escalation notice if confidence is low
-        if (response.confidence < 60) {
-          escalationNotice.style.display = 'flex';
-          
-          // Add to history as escalated
-          addToHistory(queryText, activeInput, 'escalated');
-        } else {
-          escalationNotice.style.display = 'none';
-          
-          // Add to history as resolved
-          addToHistory(queryText, activeInput, 'resolved');
-        }
-        
-        showNotification('Response generated successfully', 'success');
-      }, 2000);
-    });
-    
-    // Add message to chat
-    function addMessage(text, sender, type = 'text') {
-      const messageEl = document.createElement('div');
-      messageEl.className = `message ${sender}`;
-      
-      const now = new Date();
-      const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      
-      let typeIcon = '<i class="fas fa-keyboard"></i>';
-      if (type === 'image') typeIcon = '<i class="fas fa-camera"></i>';
-      if (type === 'voice') typeIcon = '<i class="fas fa-microphone"></i>';
-      
-      messageEl.innerHTML = `
-        <div class="message-header">
-          <span>${sender === 'user' ? 'You' : 'AgriAi Assistant'} ${sender === 'user' ? typeIcon : ''}</span>
-          <span>${timeString}</span>
-        </div>
-        <p>${text}</p>
-      `;
-      
-      chatContainer.appendChild(messageEl);
-      chatContainer.scrollTop = chatContainer.scrollHeight;
+const inputBtns = document.querySelectorAll('.input-btn');
+const textInputContent = document.querySelector('.text-input-content');
+const voiceInputContent = document.querySelector('.voice-input-content');
+inputBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    inputBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if(btn.dataset.input === 'text') {
+      textInputContent.style.display = 'block';
+      voiceInputContent.style.display = 'none';
+    } else {
+      textInputContent.style.display = 'none';
+      voiceInputContent.style.display = 'block';
     }
-    
-    // Add query to history
-    function addToHistory(text, type, status) {
-      const historyList = document.querySelector('.history-list');
-      const historyItem = document.createElement('div');
-      
-      const now = new Date();
-      const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const dateString = now.toLocaleDateString();
-      
-      let typeIcon = '<i class="fas fa-keyboard"></i> Text';
-      if (type === 'image') typeIcon = '<i class="fas fa-camera"></i> Image';
-      if (type === 'voice') typeIcon = '<i class="fas fa-microphone"></i> Voice';
-      
-      let statusClass = 'status-resolved';
-      let statusText = 'Resolved';
-      if (status === 'pending') {
-        statusClass = 'status-pending';
-        statusText = 'Processing';
-      } else if (status === 'escalated') {
-        statusClass = 'status-escalated';
-        statusText = 'With Expert';
-      }
-      
-      historyItem.className = `history-item ${status}`;
-      historyItem.innerHTML = `
-        <div class="history-header">
-          <div class="history-type">${typeIcon}</div>
-          <div class="history-time">${dateString} ${timeString}</div>
-        </div>
-        <div class="history-text">${text}</div>
-        <span class="history-status ${statusClass}">${statusText}</span>
-      `;
-      
-      historyList.insertBefore(historyItem, historyList.firstChild);
-    }
-    
-    // Feedback buttons
-    feedbackButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        feedbackButtons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        
-        if (btn.classList.contains('positive')) {
-          showNotification('Thanks for your feedback!', 'success');
-        } else {
-          showNotification('We\'ll improve our responses. Thank you!', 'error');
-        }
-      });
+  });
+});
+
+const submitBtn = document.getElementById('submitQuery');
+const chatContainer = document.querySelector('.chat-container');
+const meterFill = document.querySelector('.meter-fill');
+const meterValue = document.querySelector('.meter-value');
+const escalationNotice = document.querySelector('.escalation-notice');
+const notification = document.getElementById('notification');
+const notificationText = document.getElementById('notificationText');
+
+// Show notifications
+function showNotification(msg, type='success') {
+  notificationText.textContent = msg;
+  notification.className = 'notification show ' + type;
+  setTimeout(()=>notification.classList.remove('show'), 3000);
+}
+
+// Add message to chat
+function addMessage(msg, sender='ai') {
+  const div = document.createElement('div');
+  div.classList.add('message', sender);
+  const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+  div.innerHTML = `<div class="message-header"><span>${sender==='ai'?'AgriAi Assistant':'You'}</span><span>${time}</span></div><p>${msg}</p>`;
+  chatContainer.appendChild(div);
+  chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+// Update AI confidence meter
+function updateConfidence(value=0){
+  meterFill.style.width = value*100 + '%';
+  meterValue.textContent = Math.round(value*100) + '%';
+}
+
+// Fetch and display previous answers (on page load)
+async function loadHistory() {
+  try {
+    const res = await fetch('http://127.0.0.1:5000/api/farmer/answers');
+    const data = await res.json();
+    data.forEach(a => {
+      addMessage(a.response_text, a.responder_type.toLowerCase());
+      updateConfidence(a.responder_type==='AI'?0.8:1);
     });
-    
-    // Voice input simulation
-    document.querySelector('.voice-input i').addEventListener('click', function() {
-      const voiceInput = this.closest('.voice-input');
-      const status = voiceInput.querySelector('.recording-status');
-      
-      voiceInput.classList.toggle('active');
-      if (voiceInput.classList.contains('active')) {
-        status.textContent = 'Recording...';
-        this.classList.remove('fa-microphone');
-        this.classList.add('fa-microphone-slash');
-        
-        // Simulate speech recognition
-        setTimeout(() => {
-          voiceInput.classList.remove('active');
-          status.textContent = 'Not recording';
-          this.classList.remove('fa-microphone-slash');
-          this.classList.add('fa-microphone');
-          
-          // Simulate recognized speech
-          document.querySelector('.text-input').value = 'How to treat brown spots on tomato leaves?';
-          showNotification('Voice query processed', 'success');
-        }, 3000);
+  } catch(err){
+    console.log('Error loading history:', err);
+  }
+}
+
+// Submit text query
+async function submitTextQuery(query) {
+  escalationNotice.style.display = 'none';
+  const region = document.getElementById('userRegion').value;
+  const userId = document.getElementById('userId').value;
+
+  const data = { query: query, region: region, user_id: userId };
+  try {
+    const response = await fetch('http://127.0.0.1:5000/api/query/text', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    if(response.ok){
+      if(result.answer && result.confidence >= 0.6){
+        // AI answered confidently
+        addMessage(result.answer, 'ai');
+        updateConfidence(result.confidence);
       } else {
-        status.textContent = 'Not recording';
-        this.classList.remove('fa-microphone-slash');
-        this.classList.add('fa-microphone');
+        // Escalated to expert
+        escalationNotice.style.display = 'flex';
+        addMessage("AI could not confidently answer. Escalating to expert...", 'ai');
       }
-    });
-    
-    // Show notification function
-    function showNotification(message, type) {
-      const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
-      notification.innerHTML = `<i class="fas ${icon}"></i><div class="notification-content">${message}</div>`;
-      notification.className = `notification ${type}`;
-      notification.classList.add('show');
-      
-      setTimeout(() => {
-        notification.classList.remove('show');
-      }, 3000);
+      showNotification('Query processed','success');
+    } else {
+      showNotification(result.error || 'Server error','error');
     }
-    
-    // Image upload simulation
-    document.querySelector('.upload-area').addEventListener('click', function() {
-      showNotification('Image upload functionality would be implemented here', 'success');
-      
-      // Simulate image preview
-      const preview = this.nextElementSibling;
-      if (preview && preview.classList.contains('image-preview')) {
-        preview.style.display = 'block';
-        preview.querySelector('img').src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="150" viewBox="0 0 200 150"><rect width="200" height="150" fill="%23f0f0f0"/><text x="100" y="75" font-family="Arial" font-size="12" text-anchor="middle" fill="%23333">Image Preview</text></svg>';
-      }
+  } catch(err){
+    showNotification(err,'error');
+  }
+}
+
+// Submit image query
+async function submitImageQuery(file) {
+  escalationNotice.style.display = 'none';
+  const region = document.getElementById('userRegion').value;
+  const userId = document.getElementById('userId').value;
+
+  const formData = new FormData();
+  formData.append('image', file);
+  formData.append('region', region);
+  formData.append('user_id', userId);
+
+  try {
+    const response = await fetch('http://127.0.0.1:5000/api/query/image', {
+      method:'POST',
+      body: formData
     });
+
+    const result = await response.json();
+    if(response.ok){
+      if(result.answer && result.confidence >= 0.6){
+        addMessage(result.answer, 'ai');
+        updateConfidence(result.confidence);
+      } else {
+        escalationNotice.style.display = 'flex';
+        addMessage("AI could not confidently answer image. Escalating to expert...", 'ai');
+      }
+      showNotification('Image query processed','success');
+    } else {
+      showNotification(result.error || 'Server error','error');
+    }
+  } catch(err){
+    showNotification(err,'error');
+  }
+}
+
+// Button click handler
+submitBtn.addEventListener('click', ()=>{
+  const query = document.querySelector('.text-input').value.trim();
+  const imageInput = document.getElementById('imageInput');
+  
+  if(query) {
+    addMessage(query, 'user');
+    submitTextQuery(query);
+    document.querySelector('.text-input').value = '';
+  } else if(imageInput.files.length > 0){
+    const file = imageInput.files[0];
+    addMessage('Image uploaded', 'user');
+    submitImageQuery(file);
+    imageInput.value = '';
+  } else {
+    showNotification('Please enter a query or upload an image','error');
+  }
+});
+
+// Load history on page load
+window.addEventListener('load', loadHistory);
+
+
   </script>
 </body>
 </html>
