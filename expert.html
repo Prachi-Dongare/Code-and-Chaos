@@ -2,25 +2,1000 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Expert Dashboard</title>
-  <link rel="stylesheet" href="css/style.css">
+  <title>AgriExpert Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #2d6a4f;
+      --primary-light: #b7e4c7;
+      --primary-dark: #1b4332;
+      --accent: #ff9e1f;
+      --gray-light: #f8f9fa;
+      --gray: #e9ecef;
+      --text: #2d2d2d;
+    }
+
+    * { 
+      box-sizing: border-box; 
+      margin:0; 
+      padding:0; 
+    }
+
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f0fdf4 0%, #e6f2e8 100%);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* Navbar */
+    .navbar {
+      background: var(--primary);
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .navbar h1 {
+      margin: 0;
+      font-size: 22px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: fadeInLeft 0.8s ease;
+    }
+
+    .nav-links { 
+      display: flex; 
+      gap: 20px; 
+    }
+    
+    .navbar a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      position: relative;
+    }
+    
+    .navbar a::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--primary-light);
+      transition: width 0.3s ease;
+    }
+    
+    .navbar a:hover::after { 
+      width: 100%; 
+    }
+    
+    .navbar a:hover { 
+      color: var(--primary-light); 
+      transform: translateY(-2px); 
+    }
+
+    /* Container */
+    .container {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 20px;
+      animation: fadeInUp 0.8s ease;
+    }
+
+    .dashboard-header {
+      text-align: center;
+      margin-bottom: 40px;
+      animation: slideInFromRight 1s ease;
+    }
+
+    .dashboard-header h2 {
+      color: var(--primary);
+      font-size: 28px;
+      margin-bottom: 10px;
+      position: relative;
+      display: inline-block;
+    }
+    
+    .dashboard-header h2::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+    
+    .dashboard-header p {
+      color: #666;
+      font-size: 16px;
+      margin-top: 20px;
+    }
+
+    /* Card */
+    .card {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      padding: 25px;
+      margin-bottom: 30px;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      animation: slideInFromBottom 0.8s ease;
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    
+    .card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 100%;
+      background: var(--primary);
+      transition: height 0.5s ease;
+    }
+    
+    .card:hover::before {
+      height: 0;
+      background: var(--accent);
+      transition: height 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-8px) scale(1.01);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+
+    .card h3 {
+      margin-top: 0;
+      color: var(--primary);
+      font-size: 20px;
+      padding-left: 15px;
+      border-left: 4px solid var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: color 0.3s;
+    }
+    
+    .card:hover h3 {
+      color: var(--primary-dark);
+    }
+
+    /* Farmer query */
+    .query-box {
+      background: var(--gray-light);
+      padding: 18px;
+      border-radius: 10px;
+      margin: 18px 0;
+      position: relative;
+      overflow: hidden;
+      border-left: 4px solid var(--primary);
+      animation: fadeIn 0.8s ease;
+      transition: all 0.3s;
+    }
+    
+    .query-box:hover {
+      transform: translateX(5px);
+      box-shadow: 3px 0 10px rgba(0,0,0,0.05);
+    }
+
+    .farmer-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .farmer-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .farmer-avatar::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(to bottom right, rgba(255,255,255,0.2), transparent);
+      transform: rotate(45deg);
+    }
+    
+    .query-box:hover .farmer-avatar {
+      transform: scale(1.1);
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+
+    .query-content { 
+      padding-left: 50px; 
+      font-size: 16px; 
+      transition: all 0.3s;
+    }
+    
+    .query-box:hover .query-content {
+      transform: translateX(5px);
+    }
+
+    /* Answer input */
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      border: 2px solid #cbd5c0;
+      border-radius: 12px;
+      padding: 15px;
+      font-size: 15px;
+      resize: vertical;
+      margin: 15px 0;
+      font-family: inherit;
+      transition: all 0.3s;
+      background: #f9fdf7;
+    }
+
+    textarea:focus {
+      border: 2px solid var(--primary);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(45,106,79,0.2);
+      background: white;
+      transform: translateY(-2px);
+    }
+
+    /* Button */
+    .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 15px;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: 0.5s;
+    }
+    
+    .btn:hover::before {
+      left: 100%;
+    }
+
+    .btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 7px 14px rgba(0,0,0,0.15);
+    }
+
+    .btn:active { 
+      transform: translateY(1px) scale(0.98); 
+    }
+    
+    .btn.loading {
+      padding-right: 40px;
+    }
+    
+    .btn.success {
+      background: #4caf50;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp { 
+      from { opacity:0; transform: translateY(30px);} 
+      to { opacity:1; transform:translateY(0);} 
+    }
+    
+    @keyframes fadeInLeft { 
+      from { opacity:0; transform: translateX(-30px);} 
+      to {opacity:1; transform: translateX(0);} 
+    }
+    
+    @keyframes slideInFromRight { 
+      from { opacity:0; transform: translateX(30px);} 
+      to {opacity:1; transform: translateX(0);} 
+    }
+    
+    @keyframes slideInFromBottom { 
+      from { opacity:0; transform: translateY(30px);} 
+      to {opacity:1; transform: translateY(0);} 
+    }
+    
+    @keyframes fadeIn { 
+      from {opacity:0;} 
+      to {opacity:1;} 
+    }
+    
+    @keyframes pulse { 
+      0% { transform: scale(1); } 
+      50% { transform: scale(1.05); } 
+      100% { transform: scale(1); } 
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: -1000px 0; }
+      100% { background-position: 1000px 0; }
+    }
+    
+    .pulse { 
+      animation: pulse 0.5s ease; 
+    }
+    
+    .shimmer {
+      animation: shimmer 2s infinite linear;
+      background: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+      background-size: 1000px 100%;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 20px;
+      margin-top: 40px;
+      color: #666;
+      font-size: 14px;
+      border-top: 1px solid rgba(0,0,0,0.1);
+      animation: fadeIn 1s ease 0.5s both;
+    }
+    
+    footer p {
+      position: relative;
+      display: inline-block;
+    }
+    
+    footer p::after {
+      content: '🌱';
+      position: absolute;
+      right: -25px;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+      40% {transform: translateY(-10px);}
+      60% {transform: translateY(-5px);}
+    }
+
+    /* Responsive */
+    @media (max-width:768px) {
+      .navbar { 
+        flex-direction: column; 
+        gap:15px; 
+        padding:15px; 
+      }
+      
+      .nav-links { 
+        width:100%; 
+        justify-content: space-around; 
+      }
+      
+      .query-content { 
+        padding-left:0; 
+      }
+      
+      .card:hover {
+        transform: translateY(-5px);
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="navbar">
-    <h1>👨‍🌾 Expert Dashboard</h1>
-    <div>
-      <a href="analytics.html">Analytics</a>
-      <a href="index.html">Logout</a>
+    <h1><i class="fas fa-leaf"></i> AgriExpert Dashboard</h1>
+    <div class="nav-links">
+      <a href="analytics.html"><i class="fas fa-chart-line"></i> Analytics</a>
+      <a href="index.html"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
   </div>
 
-  <div class="card">
-    <h3>Pending Query</h3>
-    <p><b>Farmer:</b> "My tomato leaves are turning yellow."</p>
-    <textarea id="answer" placeholder="Type your answer here..."></textarea>
-    <button onclick="submitAnswer()">Submit Answer</button>
+  <div class="container">
+    <div class="dashboard-header">
+      <h2>Pending Farmer Queries</h2>
+      <p>Provide expert advice to help farmers improve crop management</p>
+    </div>
+
+    <!-- Dynamic queries will be loaded here -->
+    <div id="queries-container"></div>
   </div>
 
-  <script src="js/expert.js"></script>
+  <footer>
+    <p>AgriExpert Advisory • Bridging farmers & experts with AI-assisted guidance</p>
+  </footer>
+
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AgriExpert Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #2d6a4f;
+      --primary-light: #b7e4c7;
+      --primary-dark: #1b4332;
+      --accent: #ff9e1f;
+      --gray-light: #f8f9fa;
+      --gray: #e9ecef;
+      --text: #2d2d2d;
+    }
+
+    * { 
+      box-sizing: border-box; 
+      margin:0; 
+      padding:0; 
+    }
+
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f0fdf4 0%, #e6f2e8 100%);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* Navbar */
+    .navbar {
+      background: var(--primary);
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .navbar h1 {
+      margin: 0;
+      font-size: 22px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: fadeInLeft 0.8s ease;
+    }
+
+    .nav-links { 
+      display: flex; 
+      gap: 20px; 
+    }
+    
+    .navbar a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      position: relative;
+    }
+    
+    .navbar a::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--primary-light);
+      transition: width 0.3s ease;
+    }
+    
+    .navbar a:hover::after { 
+      width: 100%; 
+    }
+    
+    .navbar a:hover { 
+      color: var(--primary-light); 
+      transform: translateY(-2px); 
+    }
+
+    /* Container */
+    .container {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 20px;
+      animation: fadeInUp 0.8s ease;
+    }
+
+    .dashboard-header {
+      text-align: center;
+      margin-bottom: 40px;
+      animation: slideInFromRight 1s ease;
+    }
+
+    .dashboard-header h2 {
+      color: var(--primary);
+      font-size: 28px;
+      margin-bottom: 10px;
+      position: relative;
+      display: inline-block;
+    }
+    
+    .dashboard-header h2::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+    
+    .dashboard-header p {
+      color: #666;
+      font-size: 16px;
+      margin-top: 20px;
+    }
+
+    /* Card */
+    .card {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      padding: 25px;
+      margin-bottom: 30px;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      animation: slideInFromBottom 0.8s ease;
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    
+    .card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 100%;
+      background: var(--primary);
+      transition: height 0.5s ease;
+    }
+    
+    .card:hover::before {
+      height: 0;
+      background: var(--accent);
+      transition: height 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-8px) scale(1.01);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+
+    .card h3 {
+      margin-top: 0;
+      color: var(--primary);
+      font-size: 20px;
+      padding-left: 15px;
+      border-left: 4px solid var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: color 0.3s;
+    }
+    
+    .card:hover h3 {
+      color: var(--primary-dark);
+    }
+
+    /* Farmer query */
+    .query-box {
+      background: var(--gray-light);
+      padding: 18px;
+      border-radius: 10px;
+      margin: 18px 0;
+      position: relative;
+      overflow: hidden;
+      border-left: 4px solid var(--primary);
+      animation: fadeIn 0.8s ease;
+      transition: all 0.3s;
+    }
+    
+    .query-box:hover {
+      transform: translateX(5px);
+      box-shadow: 3px 0 10px rgba(0,0,0,0.05);
+    }
+
+    .farmer-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .farmer-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .farmer-avatar::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(to bottom right, rgba(255,255,255,0.2), transparent);
+      transform: rotate(45deg);
+    }
+    
+    .query-box:hover .farmer-avatar {
+      transform: scale(1.1);
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+
+    .query-content { 
+      padding-left: 50px; 
+      font-size: 16px; 
+      transition: all 0.3s;
+    }
+    
+    .query-box:hover .query-content {
+      transform: translateX(5px);
+    }
+
+    /* Answer input */
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      border: 2px solid #cbd5c0;
+      border-radius: 12px;
+      padding: 15px;
+      font-size: 15px;
+      resize: vertical;
+      margin: 15px 0;
+      font-family: inherit;
+      transition: all 0.3s;
+      background: #f9fdf7;
+    }
+
+    textarea:focus {
+      border: 2px solid var(--primary);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(45,106,79,0.2);
+      background: white;
+      transform: translateY(-2px);
+    }
+
+    /* Button */
+    .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 15px;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: 0.5s;
+    }
+    
+    .btn:hover::before {
+      left: 100%;
+    }
+
+    .btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 7px 14px rgba(0,0,0,0.15);
+    }
+
+    .btn:active { 
+      transform: translateY(1px) scale(0.98); 
+    }
+    
+    .btn.loading {
+      padding-right: 40px;
+    }
+    
+    .btn.success {
+      background: #4caf50;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp { 
+      from { opacity:0; transform: translateY(30px);} 
+      to { opacity:1; transform:translateY(0);} 
+    }
+    
+    @keyframes fadeInLeft { 
+      from { opacity:0; transform: translateX(-30px);} 
+      to {opacity:1; transform: translateX(0);} 
+    }
+    
+    @keyframes slideInFromRight { 
+      from { opacity:0; transform: translateX(30px);} 
+      to {opacity:1; transform: translateX(0);} 
+    }
+    
+    @keyframes slideInFromBottom { 
+      from { opacity:0; transform: translateY(30px);} 
+      to {opacity:1; transform: translateY(0);} 
+    }
+    
+    @keyframes fadeIn { 
+      from {opacity:0;} 
+      to {opacity:1;} 
+    }
+    
+    @keyframes pulse { 
+      0% { transform: scale(1); } 
+      50% { transform: scale(1.05); } 
+      100% { transform: scale(1); } 
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: -1000px 0; }
+      100% { background-position: 1000px 0; }
+    }
+    
+    .pulse { 
+      animation: pulse 0.5s ease; 
+    }
+    
+    .shimmer {
+      animation: shimmer 2s infinite linear;
+      background: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+      background-size: 1000px 100%;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 20px;
+      margin-top: 40px;
+      color: #666;
+      font-size: 14px;
+      border-top: 1px solid rgba(0,0,0,0.1);
+      animation: fadeIn 1s ease 0.5s both;
+    }
+    
+    footer p {
+      position: relative;
+      display: inline-block;
+    }
+    
+    footer p::after {
+      content: '🌱';
+      position: absolute;
+      right: -25px;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+      40% {transform: translateY(-10px);}
+      60% {transform: translateY(-5px);}
+    }
+
+    /* Responsive */
+    @media (max-width:768px) {
+      .navbar { 
+        flex-direction: column; 
+        gap:15px; 
+        padding:15px; 
+      }
+      
+      .nav-links { 
+        width:100%; 
+        justify-content: space-around; 
+      }
+      
+      .query-content { 
+        padding-left:0; 
+      }
+      
+      .card:hover {
+        transform: translateY(-5px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <h1><i class="fas fa-leaf"></i> AgriExpert Dashboard</h1>
+    <div class="nav-links">
+      <a href="analytics.html"><i class="fas fa-chart-line"></i> Analytics</a>
+      <a href="index.html"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="dashboard-header">
+      <h2>Pending Farmer Queries</h2>
+      <p>Provide expert advice to help farmers improve crop management</p>
+    </div>
+
+    <!-- Dynamic queries will be loaded here -->
+    <div id="queries-container"></div>
+  </div>
+
+  <footer>
+    <p>AgriExpert Advisory • Bridging farmers & experts with AI-assisted guidance</p>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      loadEscalatedQueries();
+    });
+
+    // Fetch escalated queries from backend
+    function loadEscalatedQueries() {
+      fetch('http://127.0.0.1:5000/api/dashboard/escalated')
+        .then(res => res.json())
+        .then(data => {
+          const container = document.getElementById('queries-container');
+          container.innerHTML = '';
+
+          if (data.length === 0) {
+            container.innerHTML = '<p>No pending escalated queries 🎉</p>';
+            return;
+          }
+
+          data.forEach(query => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+              <h3><i class="fas fa-question"></i> Farmer Query</h3>
+              <div class="query-box">
+                <div class="farmer-info">
+                  <div class="farmer-avatar">${query.user_id ? query.user_id[0].toUpperCase() : "F"}</div>
+                  <div>
+                    <strong>${query.user_id || "Farmer"}</strong>
+                    <div class="query-meta">${query.location || "Unknown"} • ${query.timestamp}</div>
+                  </div>
+                </div>
+                <div class="query-content">
+                  "${query.query_text}"
+                </div>
+              </div>
+              <textarea id="answer-${query.id}" placeholder="Type your expert advice here..."></textarea>
+              <button class="btn" onclick="submitAnswer(event, ${query.id})">
+                <i class="fas fa-paper-plane"></i> Submit Answer
+              </button>
+            `;
+            container.appendChild(card);
+
+            // Animate card
+            setTimeout(() => card.classList.add('visible'), 100);
+          });
+        })
+        .catch(err => {
+          console.error('Error loading queries:', err);
+        });
+    }
+
+    // Submit expert answer to backend
+    function submitAnswer(event, queryId) {
+      const textarea = document.getElementById(`answer-${queryId}`);
+      const answerText = textarea.value.trim();
+
+      if (!answerText) {
+        textarea.classList.add('pulse');
+        setTimeout(() => textarea.classList.remove('pulse'), 500);
+        textarea.focus();
+        return;
+      }
+
+      const btn = event.currentTarget;
+      const originalText = btn.innerHTML;
+
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+      btn.disabled = true;
+
+      fetch('http://127.0.0.1:5000/api/expert/reply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query_id: queryId,
+          response_text: answerText
+        })
+      })
+        .then(res => res.json())
+        .then(result => {
+          btn.innerHTML = '<i class="fas fa-check"></i> Submitted!';
+          btn.classList.add('success');
+          textarea.value = '';
+
+          setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            btn.classList.remove('success');
+            loadEscalatedQueries(); // refresh list
+          }, 1500);
+        })
+        .catch(err => {
+          console.error('Error submitting answer:', err);
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        });
+    }
+  </script>
 </body>
 </html>
+
+
